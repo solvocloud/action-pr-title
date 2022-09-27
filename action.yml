@@ -1,0 +1,25 @@
+name: validate-pr-title
+description: Validate that the PR title begins with a valid JIRA key
+inputs:
+  prTitle:
+    description: The PR's title
+    required: true
+  jiraUrl:
+    description: Base URL to JIRA
+    required: true
+  jiraEmail:
+    description: Email address of JIRA user
+    required: true
+  jiraApiToken:
+    description: JIRA API token
+    required: true
+runs:
+  using: docker
+  image: Dockerfile
+  env:
+    JIRA_URL: ${{ inputs.jiraUrl }}
+    JIRA_EMAIL: ${{ inputs.jiraEmail }}
+    JIRA_API_TOKEN: ${{ inputs.jiraApiToken }}
+  args:
+    - "--pr-title"
+    - ${{ inputs.prTitle }}
