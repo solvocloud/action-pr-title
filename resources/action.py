@@ -1,10 +1,12 @@
 import argparse
 import os
+import re
 import sys
-import json
 import logging
 
 import requests
+
+DEFAULT_ISSUE_KEY_REGEX = "[A-Z]{1,10}-[0-9]+"
 
 logging.basicConfig(stream=sys.stderr, level=logging.INFO, format="[%(levelname)-8s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -13,11 +15,15 @@ logger = logging.getLogger(__name__)
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--pr-title", required=True)
+    parser.add_argument("--issue-key-format", default=DEFAULT_ISSUE_KEY_REGEX)
     args = parser.parse_args()
     pr_title = args.pr_title
+    regex = args.issue_key_format
 
-    words = pr_title.split(":", 1)
-    issue_key = words[0].strip()
+    result = re.match(f"^({regex})(.*)", pr_title)
+    if result is None:
+        raise Exception(f"Failed extracting issue key from string: {pr_title}")
+    issue_key = result.group(1)
 
     jira_url = os.getenv("JIRA_URL")
     if not jira_url:
